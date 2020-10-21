@@ -1,0 +1,188 @@
+<html>
+<body>
+    <script type="text/javascript"
+        src="https://www.gsa.gov/sites/all/modules/contrib/jquery_update/replace/jquery/3.5/jquery.min.js?v=3.5.1"></script>
+    <script type="text/javascript" src="https://www.gsa.gov/misc/jquery-extend-3.4.0.js?v=3.5.1"></script>
+    <script src="https://www.gsa.gov/sites/gsa.gov/templates/resources/fancybox/jquery.fancybox.min.js"
+        type="text/javascript"></script>
+    <script type="text/javascript"
+        src="https://www.gsa.gov/sites/gsa.gov/templates/resources/js/jquery.cookie.js"></script>
+    <script type="text/javascript"
+        src="https://www.gsa.gov/sites/all/modules/custom/perdiem/perdiemtool/js/moment.js?qij2wn"></script>
+    <link rel="stylesheet" href="https://www.gsa.gov/sites/gsa.gov/templates/resources/fancybox/jquery.fancybox.min.css"
+        type="text/css" />
+    <h1>COVID-19 Screener</h1>
+    <p>Please check the box for any statement that applies to you. Your answers are confidential. We do not store or
+        share your responses.
+    </p>
+    <form class="covid-form">
+        <fieldset class="usa-fieldset">
+            <legend class="usa-sr-only">symptom checker
+            </legend>
+            <div class="usa-checkbox">
+                <input class="usa-checkbox__input positive" id="symptom_congestion" name="symptom_congestion"
+                    type="checkbox" value="symptom_congestion"> <label class="usa-checkbox__label"
+                    for="symptom_congestion">In the last 14 days, have you traveled internationally?</label>
+            </div>
+            <div class="usa-checkbox">
+                <input class="usa-checkbox__input positive" id="past_symptoms_3_days" name="past_symptoms_3_days"
+                    type="checkbox" value="past_symptoms_3_days"> <label class="usa-checkbox__label"
+                    for="past_symptoms_3_days">Have you had any of the following NEW or WORSENING conditions in the past
+                    48 hours?</label>
+                <ul>
+                    <li>A fever of 100.4F or higher or felt feverish</li>
+                    <li>Cough, shortness of breath or difficulty breathing</li>
+                    <li>Sore throat</li>
+                    <li>Muscle or body aches</li>
+                    <li>Chills</li>
+                    <li>Nausea, vomiting or diarrhea</li>
+                    <li>Change in smell or taste</li>
+                </ul>
+            </div>
+            <div class="usa-checkbox">
+                <input class="usa-checkbox__input positive" id="past_symptoms_7_days" name="past_symptoms_7_days"
+                    type="checkbox"> <label class="usa-checkbox__label" for="past_symptoms_7_days">Within the past 14
+                    days, have you been in close contact (6 feet or closer for at least 15 minutes) with a person who
+                    tested positive for COVID-19 or with anyone who has any COVID-19 symptoms?(fever, cough, shortness
+                    of breath or difficulty breathing, sore throat, muscle or body aches, changes in smell or taste,
+                    diarrhea)</label>
+            </div>
+            <div class="usa-checkbox">
+                <input class="usa-checkbox__input positive" id="close_contact" name="close_contact" type="checkbox"
+                    value="close_contact_with_diagnosed"> <label class="usa-checkbox__label" for="close_contact">Within
+                    the past 14 days, have you been told by a public health or medical professional to self-monitor,
+                    self-isolate, or self-quarantine because of concerns about COVID-19 infection? This includes you
+                    receiving a COVID-19 test recommended by a medical professional, with results still pending.</label>
+            </div>
+            <div class="usa-checkbox">
+                <input class="usa-checkbox__input" id="none" name="none" type="checkbox" value="none"> <label
+                    class="usa-checkbox__label" for="none">None of the above </label>
+            </div>
+        </fieldset>
+        <input class="btn" type="submit" value="See results">
+    </form>
+    <p>
+        <!--a href="/node/137381">Terms and Conditions</a> | --><a
+            href="https://www.gsa.gov/website-information/website-policies#privacy" id="anch_7">Privacy and Security
+            Notice</a>
+    </p>
+    <div class="usa-alert usa-alert--error" id="positive_selection" role="alert" style="display: none;">
+        <div class="usa-alert__body">
+            <h3 class="usa-alert__heading">Do Not Enter
+            </h3>
+            <p class="usa-alert__text">Access to a GSA facility is not approved. Please visit <a
+                    href="https://www.CDC.gov/covid19" target="blank" id="anch_8">https://www.CDC.gov/covid19</a> for
+                more information on symptoms of COVID-19.
+            </p>
+            <p class="usa-alert__text">Thank you for helping us protect you and others during this time.
+            </p>
+            <p class="usa-alert__text"><a class="usa-button" onclick="resetCovid();" id="anch_9">Review questions
+                    again</a>
+            </p>
+        </div>
+    </div>
+    <div class="usa-alert usa-alert--success" id="negative_selection" style="display: none;">
+        <div class="usa-alert__body">
+            <h3 class="usa-alert__heading">Welcome
+            </h3>
+            <p class="usa-alert__text">Access to a GSA facility is approved. OK to proceed. Please show this screen to
+                security at the facility entrance.
+            </p>
+            <a class="usa-button" onclick="resetCovid();" id="anch_10">Review questions again</a>
+        </div>
+    </div>
+    <script type="text/javascript">
+        covidAutoYes();
+        $(function () {
+            var none = $("#none[type=checkbox]"),
+                positiveSel = $(".positive[type=checkbox]");
+            $(none).change(function () {
+                $(positiveSel).prop("checked", false);
+            });
+            $(positiveSel).change(function () {
+                $(none).prop("checked", false);
+            });
+            $("form").on("submit", function (e) {
+                if ($(positiveSel).is(':checked')) {
+                    positiveSelection();
+                }
+                if ($(none).is(':checked')) {
+                    negativeSelection();
+                }
+                return false;
+            });
+        });
+        function resetCovid() {
+            $.cookie("covid", 0)
+            $.fancybox.close()
+        }
+        function covidAutoYes() {
+            var log = $.cookie("covid");
+            if (log == 1) {
+                $.fancybox.open({
+                    src: '#positive_selection',
+                    type: 'inline',
+                    modal: true,
+                    helpers: {
+                        overlay: {
+                            clickSlide: false,
+                            closeClick: false
+                        }
+                    }
+                });
+            }
+        }
+        function currentMomentDate() {
+            //console.log(moment());
+            $(".date").html(moment().format("MMMM Do, LT"));
+            $(".day").html(moment().format("dddd"));
+        };
+        function positiveSelection() {
+            $.fancybox.open({
+                src: '#positive_selection', type: 'inline', opts: {
+                    afterShow: function (instance, current) {
+                        currentMomentDate();
+                        var date = new Date();
+                        var minutes = 10;
+                        date.setTime(date.getTime() + (minutes * 60 * 1000));
+                        $.cookie("covid", 1, { expires: date, secure: true });
+                    },
+                    modal: true,
+                    helpers: {
+                        overlay: {
+                            clickSlide: false,
+                            closeClick: false
+                        }
+                    }
+                }
+            });
+        };
+        function negativeSelection() {
+            $.fancybox.close();
+            $.fancybox.open({
+                src: '#negative_selection',
+                type: 'inline'
+            });
+        };
+    </script>
+    <style type="text/css">
+        .fancybox-close-small {
+            display: none;
+        }
+
+        .icon-check {
+            font-size: 4rem;
+        }
+
+        label {
+            max-width: 50rem;
+            line-height: 1.6;
+        }
+
+        .QSIFeedbackButton * {
+            box-sizing: content-box;
+            display: none;
+        }
+    </style>
+</body>
+</html>
